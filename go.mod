@@ -1,6 +1,6 @@
 module stackroost
 
-go 1.22.3
+go 1.22
 
 require github.com/spf13/cobra v1.9.1
 
