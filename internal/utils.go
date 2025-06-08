@@ -3,6 +3,7 @@ package internal
 import (
     "fmt"
     "os/exec"
+    "os"
 )
 
 // RunCommand runs a shell command with args and returns error if any
