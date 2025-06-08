@@ -7,7 +7,7 @@ import (
 
 // WebServerConfig defines the interface for generating web server configurations
 type WebServerConfig interface {
-    Generate(domain, port string) (string, error)
+    Generate(domain, port, username string) (string, error)
     GetFileExtension() string
 }
 
