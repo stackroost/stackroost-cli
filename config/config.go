@@ -3,6 +3,7 @@ package config
 import (
     "fmt"
     "stackroost/config/apache"
+    "stackroost/config/nginx"
 )
 
 // WebServerConfig defines the interface for generating web server configurations
@@ -16,6 +17,8 @@ func NewWebServerConfig(serverType string) (WebServerConfig, error) {
     switch serverType {
     case "apache":
         return &apache.ApacheConfig{}, nil
+    case "nginx":
+		return &nginx.NginxConfig{}, nil
     default:
         return nil, fmt.Errorf("unsupported web server type: %s", serverType)
     }
