@@ -43,7 +43,15 @@ var createDomainCmd = &cobra.Command{
 
 		// Check config existence first
 		ext := ".conf"
-		configPath := filepath.Join("/etc/apache2/sites-available", domain+ext)
+		var configPath string
+
+		switch serverType {
+		case "nginx":
+			configPath = filepath.Join("/etc/nginx/sites-available", domain+ext)
+		default: // assume apache
+			configPath = filepath.Join("/etc/apache2/sites-available", domain+ext)
+		}
+
 		if _, err := os.Stat(configPath); err == nil {
 			fmt.Printf("  Configuration for '%s' already exists at %s\n", domain, configPath)
 			fmt.Println(" Aborting to prevent overwriting existing configuration.")
@@ -119,16 +127,36 @@ var createDomainCmd = &cobra.Command{
 
 		filename := fmt.Sprintf("%s%s", domain, configGen.GetFileExtension())
 
-		fmt.Println(" Enabling site with a2ensite...")
-		if err := internal.RunCommand("sudo", "a2ensite", filename); err != nil {
-			fmt.Printf(" Failed to enable site: %v\n", err)
-			os.Exit(1)
-		}
+		switch serverType {
+		case "apache":
+			fmt.Println(" Enabling site with a2ensite...")
+			if err := internal.RunCommand("sudo", "a2ensite", filename); err != nil {
+				fmt.Printf(" Failed to enable site: %v\n", err)
+				os.Exit(1)
+			}
 
-		fmt.Println("Reloading Apache server...")
-		if err := internal.RunCommand("sudo", "systemctl", "reload", "apache2"); err != nil {
-			fmt.Printf(" Failed to reload apache: %v\n", err)
-			os.Exit(1)
+			fmt.Println("Reloading Apache server...")
+			if err := internal.RunCommand("sudo", "systemctl", "reload", "apache2"); err != nil {
+				fmt.Printf(" Failed to reload apache: %v\n", err)
+				os.Exit(1)
+			}
+
+		case "nginx":
+			sitePath := filepath.Join("/etc/nginx/sites-available", filename)
+			linkPath := filepath.Join("/etc/nginx/sites-enabled", filename)
+			fmt.Println(" Enabling Nginx site...")
+			if _, err := os.Stat(linkPath); os.IsNotExist(err) {
+				if err := internal.RunCommand("sudo", "ln", "-s", sitePath, linkPath); err != nil {
+					fmt.Printf(" Failed to enable nginx site: %v\n", err)
+					os.Exit(1)
+				}
+			}
+
+			fmt.Println("Reloading Nginx server...")
+			if err := internal.RunCommand("sudo", "systemctl", "reload", "nginx"); err != nil {
+				fmt.Printf(" Failed to reload nginx: %v\n", err)
+				os.Exit(1)
+			}
 		}
 
 		fmt.Printf("🎉 %s configuration created and enabled for %s on port %s\n", serverType, domain, port)
@@ -159,7 +187,15 @@ func printWelcome() {
 }
 
 func writeConfigFile(domain, content, extension string) error {
-	outputDir := "/etc/apache2/sites-available"
+	var outputDir string
+	if extension == ".conf" {
+		if strings.HasPrefix(content, "server") {
+			outputDir = "/etc/nginx/sites-available"
+		} else {
+			outputDir = "/etc/apache2/sites-available"
+		}
+	}
+
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory: %v", err)
 	}
