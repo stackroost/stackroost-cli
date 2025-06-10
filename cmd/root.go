@@ -37,19 +37,20 @@ var createDomainCmd = &cobra.Command{
 		if internal.IsNilOrEmpty(port) {
 			port = "80"
 		}
-
-		// Extract username from domain
 		username := strings.Split(domain, ".")[0]
-
-		// Check config existence first
+		
 		ext := ".conf"
 		var configPath string
 
 		switch serverType {
 		case "nginx":
 			configPath = filepath.Join("/etc/nginx/sites-available", domain+ext)
-		default: // assume apache
+		case "caddy":
+			configPath = filepath.Join("/etc/caddy/sites-available", domain+ext)
+		case "apache":
 			configPath = filepath.Join("/etc/apache2/sites-available", domain+ext)
+		default: 
+			fmt.Println("Error: Unsupported server type. Supported types are: apache, nginx, caddy")
 		}
 
 		if _, err := os.Stat(configPath); err == nil {
@@ -157,6 +158,24 @@ var createDomainCmd = &cobra.Command{
 				fmt.Printf(" Failed to reload nginx: %v\n", err)
 				os.Exit(1)
 			}
+
+		case "caddy":
+			sitePath := filepath.Join("/etc/caddy/sites-available", filename)
+			linkPath := filepath.Join("/etc/caddy/sites-enabled", filename)
+			fmt.Println(" Enabling Caddy site...")
+
+			if _, err := os.Stat(linkPath); os.IsNotExist(err) {
+				if err := internal.RunCommand("sudo", "ln", "-s", sitePath, linkPath); err != nil {
+					fmt.Printf(" Failed to enable caddy site: %v\n", err)
+					os.Exit(1)
+				}
+			}
+		}
+
+		fmt.Println("Reloading Caddy server...")
+		if err := internal.RunCommand("sudo", "systemctl", "reload", "caddy"); err != nil {
+			fmt.Printf(" Failed to reload caddy: %v\n", err)
+			os.Exit(1)
 		}
 
 		fmt.Printf("🎉 %s configuration created and enabled for %s on port %s\n", serverType, domain, port)
@@ -191,6 +210,8 @@ func writeConfigFile(domain, content, extension string) error {
 	if extension == ".conf" {
 		if strings.HasPrefix(content, "server") {
 			outputDir = "/etc/nginx/sites-available"
+		} else if strings.Contains(content, "php_fastcgi") {
+			outputDir = "/etc/caddy/sites-available"
 		} else {
 			outputDir = "/etc/apache2/sites-available"
 		}
