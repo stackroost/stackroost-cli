@@ -6,7 +6,6 @@ import (
     "os"
 )
 
-// RunCommand runs a shell command with args and returns error if any
 func RunCommand(name string, args ...string) error {
     cmd := exec.Command(name, args...)
     cmd.Stdout = os.Stdout
@@ -17,7 +16,6 @@ func RunCommand(name string, args ...string) error {
     return nil
 }
 
-// IsNilOrEmpty returns true if the string is empty or "<nil>"
 func IsNilOrEmpty(s string) bool {
     return s == "" || s == "<nil>"
 }

@@ -2,7 +2,6 @@ package nginx
 
 import "fmt"
 
-// NginxConfig implements WebServerConfig for Nginx
 type NginxConfig struct{}
 
 func (n *NginxConfig) Generate(domain, port, username string) (string, error) {
