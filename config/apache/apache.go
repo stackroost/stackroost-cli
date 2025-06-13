@@ -2,10 +2,8 @@ package apache
 
 import "fmt"
 
-// ApacheConfig implements the WebServerConfig interface for Apache
 type ApacheConfig struct{}
 
-// Generate creates an Apache virtual host configuration
 func (a *ApacheConfig) Generate(domain, port, username string) (string, error) {
     vhostTemplate := `<VirtualHost *:%s>
     ServerName %s
@@ -23,8 +21,6 @@ func (a *ApacheConfig) Generate(domain, port, username string) (string, error) {
     return fmt.Sprintf(vhostTemplate, port, domain, domain, username, domain, domain, username), nil
 }
 
-
-// GetFileExtension returns the file extension for Apache config files
 func (a *ApacheConfig) GetFileExtension() string {
     return ".conf"
 }

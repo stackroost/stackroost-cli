@@ -2,7 +2,6 @@ package caddy
 
 import "fmt"
 
-// CaddyConfig implements WebServerConfig for Caddy
 type CaddyConfig struct{}
 
 func (c *CaddyConfig) Generate(domain, port, username string) (string, error) {
