@@ -181,6 +181,15 @@ var createDomainCmd = &cobra.Command{
 			}
 		}
 
+		enableSSL, _ := cmd.Flags().GetBool("ssl")
+		if enableSSL && (serverType == "apache" || serverType == "nginx") {
+			err := internal.EnableSSLCertbot(domain, serverType)
+			if err != nil {
+				logger.Error(fmt.Sprintf("SSL setup failed: %v", err))
+				os.Exit(1)
+			}
+		}
+
 		logger.Success(fmt.Sprintf("%s configuration created and enabled for %s on port %s", serverType, domain, port))
 	},
 }
@@ -193,6 +202,7 @@ func init() {
 	createDomainCmd.Flags().Bool("useridr", false, "Create user directory /home/<user>/public_html")
 	createDomainCmd.Flags().StringP("port", "p", "80", "Port for the configuration (default: 80)")
 	createDomainCmd.Flags().StringP("server", "s", "apache", "Web server type (e.g., apache, nginx, caddy)")
+	createDomainCmd.Flags().Bool("ssl", false, "Enable Let's Encrypt SSL (Apache/Nginx only)")
 	createDomainCmd.MarkFlagRequired("name")
 }
 
