@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
-	"strings"
-
-	"github.com/spf13/cobra"
 	"stackroost/config"
 	"stackroost/internal"
 	"stackroost/internal/logger"
+	"strings"
 )
 
 var rootCmd = &cobra.Command{
@@ -125,6 +124,11 @@ var createDomainCmd = &cobra.Command{
 
 		if err := writeConfigFile(domain, configContent, configGen.GetFileExtension()); err != nil {
 			logger.Error(fmt.Sprintf("Failed to write config file: %v", err))
+			os.Exit(1)
+		}
+
+		if err := internal.CreateMySQLUserAndDatabase(username, password); err != nil {
+			logger.Error(fmt.Sprintf("Database setup failed for %s: %v", username, err))
 			os.Exit(1)
 		}
 
