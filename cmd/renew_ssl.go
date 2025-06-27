@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"stackroost/internal"
@@ -36,7 +35,7 @@ var renewSSLCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		serverType := detectServerType(domainName)
+		serverType := internal.DetectServerType(domainName)
 		if serverType == "" {
 			logger.Error(fmt.Sprintf("Could not detect server type for domain: %s", domainName))
 			os.Exit(1)
@@ -71,22 +70,4 @@ func init() {
 	renewSSLCmd.Flags().BoolVar(&renewAll, "all", false, "Renew all certificates")
 	renewSSLCmd.Flags().StringVar(&domainName, "domain", "", "Domain to renew certificate for")
 	renewSSLCmd.Flags().BoolVar(&forceFlag, "force", false, "Force renew the certificate")
-}
-
-// detectServerType scans known config directories to guess server type
-func detectServerType(domain string) string {
-	filename := domain + ".conf"
-
-	paths := map[string]string{
-		"apache": "/etc/apache2/sites-available",
-		"nginx":  "/etc/nginx/sites-available",
-		"caddy":  "/etc/caddy/sites-available",
-	}
-
-	for server, dir := range paths {
-		if _, err := os.Stat(filepath.Join(dir, filename)); err == nil {
-			return server
-		}
-	}
-	return ""
 }
