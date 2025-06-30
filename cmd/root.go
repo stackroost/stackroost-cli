@@ -10,6 +10,7 @@ import (
 	"stackroost/internal/logger"
 	"strings"
 	"stackroost/cmd/ssl"
+	"stackroost/cmd/logs"
 )
 
 var rootCmd = &cobra.Command{
@@ -210,7 +211,7 @@ func init() {
 	createDomainCmd.Flags().Bool("ssl", false, "Enable Let's Encrypt SSL (Apache/Nginx only)")
 	createDomainCmd.MarkFlagRequired("name")
 	rootCmd.AddCommand(ssl.CheckSSLExpiryCmd)
-
+		rootCmd.AddCommand(logs.AnalyzeTrafficCmd)
 }
 
 func Execute() {
