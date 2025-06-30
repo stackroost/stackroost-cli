@@ -1,4 +1,4 @@
-package cmd
+package server
 
 import (
 	"fmt"
@@ -8,30 +8,37 @@ import (
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
-	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/mem"
 
 	"github.com/spf13/cobra"
 	"stackroost/internal/logger"
 )
 
-var serverHealthCmd = &cobra.Command{
-	Use:   "server-health",
-	Short: "Check system resource usage and web server status",
-	Run: func(cmd *cobra.Command, args []string) {
-		printHostname()
-		printUptime()
-		printCPU()
-		printMemory()
-		printDisk()
-		printWebServerStatus("apache2")
-		printWebServerStatus("nginx")
-		printWebServerStatus("caddy")
-	},
+func GetHealthCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "server-health",
+		Short: "Check system resource usage and web server status",
+		Run: func(cmd *cobra.Command, args []string) {
+			printHostname()
+			printUptime()
+			printCPU()
+			printMemory()
+			printDisk()
+			printWebServerStatus("apache2")
+			printWebServerStatus("nginx")
+			printWebServerStatus("caddy")
+		},
+	}
 }
 
-func init() {
-	rootCmd.AddCommand(serverHealthCmd)
+func printHostname() {
+	info, err := host.Info()
+	if err != nil {
+		logger.Warn(fmt.Sprintf("Hostname fetch error: %v", err))
+		return
+	}
+	logger.Info(fmt.Sprintf("Hostname: %s", info.Hostname))
 }
 
 func printUptime() {
@@ -82,13 +89,4 @@ func printWebServerStatus(service string) {
 	} else {
 		logger.Warn(fmt.Sprintf("%s: Inactive or not installed", strings.Title(service)))
 	}
-}
-
-func printHostname() {
-	info, err := host.Info()
-	if err != nil {
-		logger.Warn(fmt.Sprintf("Hostname fetch error: %v", err))
-		return
-	}
-	logger.Info(fmt.Sprintf("Hostname: %s", info.Hostname))
 }

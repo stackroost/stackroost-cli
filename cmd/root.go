@@ -9,9 +9,14 @@ import (
 	"stackroost/internal"
 	"stackroost/internal/logger"
 	"strings"
-	"stackroost/cmd/ssl"
-	"stackroost/cmd/logs"
+	"stackroost/cmd/domain"
 	"stackroost/cmd/email"
+	"stackroost/cmd/firewall"
+	"stackroost/cmd/logs"
+	"stackroost/cmd/security"
+	"stackroost/cmd/server"
+	"stackroost/cmd/ssl"
+	"stackroost/cmd/user"
 )
 
 var rootCmd = &cobra.Command{
@@ -211,9 +216,15 @@ func init() {
 	createDomainCmd.Flags().StringP("server", "s", "apache", "Web server type (e.g., apache, nginx, caddy)")
 	createDomainCmd.Flags().Bool("ssl", false, "Enable Let's Encrypt SSL (Apache/Nginx only)")
 	createDomainCmd.MarkFlagRequired("name")
-	rootCmd.AddCommand(ssl.CheckSSLExpiryCmd)
-	rootCmd.AddCommand(logs.AnalyzeTrafficCmd)
-	rootCmd.AddCommand(email.TestEmailCmd)
+
+	registerSSLCmds()
+	registerLogCmds()
+	registerEmailCmds()
+	registerUserCmds()
+	registerFirewallCmds()
+	registerServerCmds()
+	registerSecurityCmds()
+	registerDomainExtras()
 }
 
 func Execute() {
@@ -297,4 +308,72 @@ func writeConfigFile(domain, content, extension string) error {
 
 	logger.Success(fmt.Sprintf("Configuration file written to %s", outputPath))
 	return nil
+}
+
+
+func registerDomainExtras() {
+	rootCmd.AddCommand(
+		domain.GetBackupCmd(),
+		domain.GetCloneCmd(),
+		domain.GetListCmd(),
+		domain.GetRemoveCmd(),
+		domain.GetRestoreCmd(),
+		domain.GetStatusCmd(),
+		domain.GetToggleCmd(),
+		domain.GetUpdatePortCmd(),
+	)
+}
+
+func registerEmailCmds() {
+	rootCmd.AddCommand(email.GetTestCmd())
+}
+
+func registerFirewallCmds() {
+	rootCmd.AddCommand(
+		firewall.GetEnableCmd(),
+		firewall.GetDisableCmd(),
+	)
+}
+
+func registerLogCmds() {
+	rootCmd.AddCommand(
+		logs.GetAnalyzeCmd(),
+		logs.GetPurgeCmd(),
+		logs.GetDomainLogsCmd(),
+	)
+}
+
+func registerSecurityCmds() {
+	rootCmd.AddCommand(
+		security.GetCheckCmd(),
+		security.GetSecureCmd(),
+	)
+	
+}
+
+func registerServerCmds() {
+	rootCmd.AddCommand(
+		server.GetHealthCmd(),
+		server.GetRestartCmd(),
+		server.GetScheduleRestartCmd(),
+		server.GetCheckPortCmd(),
+		server.GetSyncTimeCmd(),
+		server.GetInspectCmd(),
+	)
+}
+
+func registerSSLCmds() {
+	rootCmd.AddCommand(
+		ssl.GetEnableCmd(),
+		ssl.GetDisableCmd(),
+		ssl.GetRenewCmd(),
+		ssl.GetExpiryCmd(),
+	)
+}
+
+func registerUserCmds() {
+	rootCmd.AddCommand(
+		user.GetListCmd(),
+		user.GetDeleteCmd(),
+	)
 }

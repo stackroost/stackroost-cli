@@ -25,6 +25,7 @@ func init() {
 	AnalyzeTrafficCmd.MarkFlagRequired("domain")
 }
 
+// Main logic
 func runAnalyzeTraffic(cmd *cobra.Command, args []string) {
 	domain, _ := cmd.Flags().GetString("domain")
 	lines, _ := cmd.Flags().GetInt("lines")
@@ -108,4 +109,9 @@ func printTopN(data map[string]int, n int) {
 	for i := 0; i < n && i < len(sorted); i++ {
 		fmt.Printf("  %s → %d\n", sorted[i].Key, sorted[i].Value)
 	}
+}
+
+// Exportable getter
+func GetAnalyzeCmd() *cobra.Command {
+	return AnalyzeTrafficCmd
 }

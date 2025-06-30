@@ -9,7 +9,6 @@ import (
 	"stackroost/internal/logger"
 )
 
-
 var TestEmailCmd = &cobra.Command{
 	Use:   "test-email",
 	Short: "Check if email capability is available on this system (mail/sendmail/msmtp)",
@@ -38,4 +37,9 @@ var TestEmailCmd = &cobra.Command{
 func init() {
 	TestEmailCmd.Flags().String("to", "", "Recipient email address")
 	TestEmailCmd.MarkFlagRequired("to")
+}
+
+// This is the getter function for use in root registration
+func GetTestCmd() *cobra.Command {
+	return TestEmailCmd
 }

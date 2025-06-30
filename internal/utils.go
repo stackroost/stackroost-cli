@@ -5,6 +5,7 @@ import (
     "os/exec"
     "os"
     "path/filepath"
+	"strings"
 
 )
 
@@ -37,4 +38,13 @@ func DetectServerType(domain string) string {
 		}
 	}
 	return ""
+}
+
+func CaptureCommand(name string, args ...string) string {
+	var out strings.Builder
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	_ = cmd.Run()
+	return out.String()
 }
