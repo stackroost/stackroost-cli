@@ -385,9 +385,14 @@ func registerUserCmds() {
 }
 
 func customHelpFunc(cmd *cobra.Command, args []string) {
-	fmt.Println("\nStackRoost CLI - manage your Linux servers with ease\n")
-	fmt.Println("Usage:\n  stackroost [command]\n")
-	fmt.Println("Available Commands:")
+fmt.Println()
+fmt.Println("StackRoost CLI - manage your Linux servers with ease")
+fmt.Println()
+fmt.Println("Usage:")
+fmt.Println("  stackroost [command]")
+fmt.Println()
+fmt.Println("Available Commands:")
+
 
 	group := map[string][]*cobra.Command{}
 
@@ -418,11 +423,13 @@ func customHelpFunc(cmd *cobra.Command, args []string) {
 	}
 
 	for title, commands := range group {
-		fmt.Printf("\n%s\n", title)
-		for _, c := range commands {
-			fmt.Printf("  %-22s %s\n", c.Use, c.Short)
-		}
+	fmt.Printf("\n%s\n", title)
+	for _, c := range commands {
+		fmt.Printf("  %-22s %s\n", c.Use, c.Short)
 	}
+}
 
-	fmt.Println("\nUse \"stackroost [command] --help\" for more information about a command.\n")
+fmt.Println()
+fmt.Println("Use \"stackroost [command] --help\" for more information about a command.")
+
 }
