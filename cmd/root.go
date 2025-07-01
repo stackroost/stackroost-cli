@@ -22,6 +22,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "stackroost",
 	Short: "StackRoost CLI - manage your Linux servers with ease",
+	Version: "v1.0.0",
 	Run: func(cmd *cobra.Command, args []string) {
 		printWelcome()
 	},
@@ -32,6 +33,10 @@ var createDomainCmd = &cobra.Command{
 	Short: "Create a web server configuration for a domain",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Info("Starting create-domain command execution")
+		if len(args) > 0 && (args[0] == "--help" || args[0] == "-h" || args[0] == "help") {
+			customHelpFunc(cmd, args)
+			return
+		}
 
 		domain, _ := cmd.Flags().GetString("name")
 		port, _ := cmd.Flags().GetString("port")
@@ -377,4 +382,47 @@ func registerUserCmds() {
 		user.GetListCmd(),
 		user.GetDeleteCmd(),
 	)
+}
+
+func customHelpFunc(cmd *cobra.Command, args []string) {
+	fmt.Println("\nStackRoost CLI - manage your Linux servers with ease\n")
+	fmt.Println("Usage:\n  stackroost [command]\n")
+	fmt.Println("Available Commands:")
+
+	group := map[string][]*cobra.Command{}
+
+	for _, c := range cmd.Commands() {
+		if !c.IsAvailableCommand() {
+			continue
+		}
+		switch {
+		case strings.Contains(c.Use, "domain") || c.Use == "create-domain" || c.Use == "monitor":
+			group["🔧 Domain Management"] = append(group["🔧 Domain Management"], c)
+		case strings.Contains(c.Use, "email") || c.Use == "test-email":
+			group["📧 Email Utilities"] = append(group["📧 Email Utilities"], c)
+		case strings.Contains(c.Use, "firewall"):
+			group["🛡 Firewall Control"] = append(group["🛡 Firewall Control"], c)
+		case strings.Contains(c.Use, "log"):
+			group["📜 Log Management"] = append(group["📜 Log Management"], c)
+		case strings.Contains(c.Use, "secure") || strings.Contains(c.Use, "security"):
+			group["🧰 Security"] = append(group["🧰 Security"], c)
+		case strings.Contains(c.Use, "server") || strings.Contains(c.Use, "inspect") || strings.Contains(c.Use, "check-port"):
+			group["🖥 Server Management"] = append(group["🖥 Server Management"], c)
+		case c.Use == "enable" || c.Use == "disable" || c.Use == "renew" || c.Use == "expiry" || c.Use == "test":
+			group["🔐 SSL Certificates"] = append(group["🔐 SSL Certificates"], c)
+		case strings.Contains(c.Use, "user"):
+			group["👤 User Management"] = append(group["👤 User Management"], c)
+		default:
+			group["Other Commands"] = append(group["Other Commands"], c)
+		}
+	}
+
+	for title, commands := range group {
+		fmt.Printf("\n%s\n", title)
+		for _, c := range commands {
+			fmt.Printf("  %-22s %s\n", c.Use, c.Short)
+		}
+	}
+
+	fmt.Println("\nUse \"stackroost [command] --help\" for more information about a command.\n")
 }
