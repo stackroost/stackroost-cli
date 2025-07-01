@@ -423,11 +423,13 @@ fmt.Println("Available Commands:")
 	}
 
 	for title, commands := range group {
-		fmt.Printf("\n%s\n", title)
-		for _, c := range commands {
-			fmt.Printf("  %-22s %s\n", c.Use, c.Short)
-		}
+	fmt.Printf("\n%s\n", title)
+	for _, c := range commands {
+		fmt.Printf("  %-22s %s\n", c.Use, c.Short)
 	}
+}
 
-	fmt.Println("\nUse \"stackroost [command] --help\" for more information about a command.\n")
+fmt.Println()
+fmt.Println("Use \"stackroost [command] --help\" for more information about a command.")
+
 }
