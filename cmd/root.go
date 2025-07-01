@@ -385,9 +385,14 @@ func registerUserCmds() {
 }
 
 func customHelpFunc(cmd *cobra.Command, args []string) {
-	fmt.Println("\nStackRoost CLI - manage your Linux servers with ease\n")
-	fmt.Println("Usage:\n  stackroost [command]\n")
-	fmt.Println("Available Commands:")
+fmt.Println()
+fmt.Println("StackRoost CLI - manage your Linux servers with ease")
+fmt.Println()
+fmt.Println("Usage:")
+fmt.Println("  stackroost [command]")
+fmt.Println()
+fmt.Println("Available Commands:")
+
 
 	group := map[string][]*cobra.Command{}
 
