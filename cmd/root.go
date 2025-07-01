@@ -321,6 +321,7 @@ func registerDomainExtras() {
 		domain.GetStatusCmd(),
 		domain.GetToggleCmd(),
 		domain.GetUpdatePortCmd(),
+		domain.GetMonitorCmd(),
 	)
 }
 
