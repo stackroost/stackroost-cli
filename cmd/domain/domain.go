@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 Stackroost CLI
-
 */
 package domain
 
@@ -10,9 +9,11 @@ import (
 	"os"
 	"strings"
 
+	"stackroost-cli/cmd/internal/logger"
+	"stackroost-cli/cmd/internal/utils"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"stackroost-cli/cmd/internal/utils"
 )
 
 // domainCmd represents the domain command
@@ -32,8 +33,9 @@ var domainAddCmd = &cobra.Command{
 		if server == "" {
 			server = "apache" // default
 		}
+		logger.Info(fmt.Sprintf("Domain %s adding for %s", domain, server))
 		createVhost(domain, server)
-		fmt.Printf("Added domain %s for %s\n", domain, server)
+		logger.Success(fmt.Sprintf("Domain %s added for %s", domain, server))
 	},
 }
 
@@ -51,8 +53,9 @@ var domainRemoveCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		domain := args[0]
+		logger.Error(fmt.Sprintf("Domain %s removing", domain))
 		removeVhost(domain)
-		fmt.Printf("Removed domain %s\n", domain)
+		logger.Error(fmt.Sprintf("Domain %s removed", domain))
 	},
 }
 
@@ -63,6 +66,7 @@ var domainEnableCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		domain := args[0]
 		server := viper.GetString("domains." + domain + ".server")
+		logger.Info(fmt.Sprintf("Domain %s enabling", domain))
 		if server == "apache" {
 			utils.RunCommand("sudo", "a2ensite", domain)
 			utils.RunCommand("sudo", "systemctl", "reload", "apache2")
@@ -72,7 +76,7 @@ var domainEnableCmd = &cobra.Command{
 		} else if server == "caddy" {
 			utils.RunCommand("sudo", "systemctl", "reload", "caddy")
 		}
-		fmt.Printf("Enabled domain %s\n", domain)
+		logger.Success(fmt.Sprintf("Domain %s enabled", domain))
 	},
 }
 
@@ -83,6 +87,7 @@ var domainDisableCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		domain := args[0]
 		server := viper.GetString("domains." + domain + ".server")
+		logger.Info(fmt.Sprintf("Domain %s disabling", domain))
 		if server == "apache" {
 			utils.RunCommand("sudo", "a2dissite", domain)
 			utils.RunCommand("sudo", "systemctl", "reload", "apache2")
@@ -92,7 +97,7 @@ var domainDisableCmd = &cobra.Command{
 		} else if server == "caddy" {
 			utils.RunCommand("sudo", "systemctl", "reload", "caddy")
 		}
-		fmt.Printf("Disabled domain %s\n", domain)
+		logger.Success(fmt.Sprintf("Domain %s disabled", domain))
 	},
 }
 
@@ -103,8 +108,9 @@ var domainSetRootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		domain := args[0]
 		root := args[1]
+		logger.Info(fmt.Sprintf("setting document root"))
 		setDocumentRoot(domain, root)
-		fmt.Printf("Set document root for %s to %s\n", domain, root)
+		logger.Success(fmt.Sprintf("Set document root for %s to %s\n", domain, root))
 	},
 }
 
@@ -127,6 +133,7 @@ func createVhost(domain, server string) {
 
 	viper.Set("domains."+domain+".server", server)
 	viper.Set("domains."+domain+".root", root)
+	logger.Info(fmt.Sprintf("Writing configuration for domain %s", domain))
 	viper.WriteConfig()
 
 	var content string
@@ -168,7 +175,7 @@ func listDomains() {
 	for domain := range domains {
 		server := viper.GetString("domains." + domain + ".server")
 		root := viper.GetString("domains." + domain + ".root")
-		fmt.Printf("%s (%s) -> %s\n", domain, server, root)
+		logger.Info(fmt.Sprintf("%s (%s) -> %s\n", domain, server, root))
 	}
 }
 
@@ -186,6 +193,7 @@ func removeVhost(domain string) {
 	}
 	os.Remove(file)
 	// Remove from config
+	logger.Info(fmt.Sprintf("Removing configuration for domain %s", domain))
 	viper.Set("domains."+domain, nil)
 	viper.WriteConfig()
 }
@@ -224,6 +232,7 @@ func setDocumentRoot(domain, root string) {
 		}
 		ioutil.WriteFile(file, []byte(strings.Join(lines, "\n")), 0644)
 	}
+	logger.Info(fmt.Sprintf("Updating configuration for domain %s root to %s", domain, root))
 	viper.Set("domains."+domain+".root", root)
 	viper.WriteConfig()
 }

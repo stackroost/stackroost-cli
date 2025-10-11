@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"stackroost-cli/cmd/domain"
+	"stackroost-cli/cmd/internal/logger"
 	"stackroost-cli/cmd/logs"
 	"stackroost-cli/cmd/remote"
 	"stackroost-cli/cmd/security"
@@ -32,6 +33,7 @@ domains, SSL certificates, user access, and multi-server deployments across loca
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	PrintBanner()
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -68,7 +70,7 @@ func initConfig() {
 
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		logger.Info(fmt.Sprintf("Using config file: %s", viper.ConfigFileUsed()))
 	}
 }
 

@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
+	"stackroost-cli/cmd/internal/logger"
 )
 
 // remoteCmd represents the remote command
@@ -32,6 +33,7 @@ var remoteAddCmd = &cobra.Command{
 		key, _ := cmd.Flags().GetString("key")
 		viper.Set("remotes."+name+".userhost", userHost)
 		viper.Set("remotes."+name+".key", key)
+		logger.Info(fmt.Sprintf("Writing configuration for remote %s", name))
 		viper.WriteConfig()
 		fmt.Printf("Added remote %s: %s\n", name, userHost)
 	},
