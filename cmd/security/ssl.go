@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"stackroost-cli/cmd/internal/logger"
 	"stackroost-cli/cmd/internal/utils"
 )
 
@@ -107,6 +108,7 @@ func addSSLToVhost(domain, server string) {
 	if server == "apache" {
 		// Certbot handles it
 	} else if server == "nginx" {
+		logger.Info(fmt.Sprintf("Adding SSL configuration to vhost for domain %s", domain))
 		file := fmt.Sprintf("/etc/nginx/sites-available/%s", domain)
 		content, _ := ioutil.ReadFile(file)
 		// Add SSL server block
