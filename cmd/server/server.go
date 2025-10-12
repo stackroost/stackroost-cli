@@ -21,7 +21,7 @@ var serverCmd = &cobra.Command{
 }
 
 var servers = map[string]string{
-	"apache": "apache2",
+	"apache": "httpd",
 	"nginx":  "nginx",
 	"caddy":  "caddy",
 }
